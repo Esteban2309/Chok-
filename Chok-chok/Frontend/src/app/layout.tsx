@@ -75,7 +75,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="scroll-smooth">
+    <html lang="en" className="scroll-smooth" suppressHydrationWarning>
       <head>
         {/* Preconnect to external domains for performance */}
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -98,23 +98,38 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="//images.unsplash.com" />
       </head>
       <body 
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900`}
+        className={`
+          ${geistSans.variable} 
+          ${geistMono.variable} 
+          antialiased 
+          min-h-screen 
+          bg-white 
+          text-gray-900
+          dark:bg-slate-900 
+          dark:text-slate-100
+          transition-colors 
+          duration-300
+        `}
+        suppressHydrationWarning
       >
         {/* Skip to main content for accessibility */}
         <a 
           href="#main-content" 
-          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary-600 text-white px-4 py-2 rounded-md z-50"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary-600 text-white px-4 py-2 rounded-md z-50 font-medium"
         >
           Skip to main content
         </a>
         
         {/* Main app container */}
-        <div id="main-content" className="relative">
+        <div id="main-content" className="relative text-foreground">
           {children}
         </div>
         
         {/* Loading indicator for better UX */}
-        <div id="loading-indicator" className="fixed top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-500 to-secondary-500 transform -translate-x-full transition-transform duration-300 ease-out z-50"></div>
+        <div 
+          id="loading-indicator" 
+          className="fixed top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-500 to-secondary-500 transform -translate-x-full transition-transform duration-300 ease-out z-50"
+        ></div>
         
         {/* Service worker registration script */}
         <script

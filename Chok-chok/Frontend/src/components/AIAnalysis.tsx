@@ -136,9 +136,11 @@ const AIAnalysis: React.FC = () => {
   const [analysisResults, setAnalysisResults] = useState<AnalysisResults | null>(null);
   const [activeTab, setActiveTab] = useState<ActiveTab>('overview');
   const [cameraActive, setCameraActive] = useState<boolean>(false);
+  const [cameraError, setCameraError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const cameraStreamRef = useRef<MediaStream | null>(null);
 
   // Simular análisis de IA con resultados realistas
   const performAnalysis = useCallback(async (): Promise<void> => {
@@ -249,42 +251,53 @@ const AIAnalysis: React.FC = () => {
   };
 
   const startCamera = async (): Promise<void> => {
+    setCameraError(null);
+    setCameraActive(true);
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: 'user', width: 1280, height: 720 } 
+      // Solicita la cámara con la menor latencia posible y resolución baja
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: { ideal: 'user' },
+          width: { ideal: 480, max: 640 },
+          height: { ideal: 360, max: 480 },
+          frameRate: { ideal: 30, max: 60 }
+        },
+        audio: false
       });
+      cameraStreamRef.current = stream;
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
+        // Usa requestAnimationFrame para asegurar el render inmediato
+        requestAnimationFrame(() => {
+          videoRef.current && videoRef.current.play();
+        });
       }
-      setCameraActive(true);
     } catch (err) {
-      console.error('Error accessing camera:', err);
+      setCameraError('No se pudo acceder a la cámara. Verifica los permisos.');
+      setCameraActive(false);
     }
+  };
+
+  const stopCamera = () => {
+    if (cameraStreamRef.current) {
+      cameraStreamRef.current.getTracks().forEach(track => track.stop());
+      cameraStreamRef.current = null;
+    }
+    setCameraActive(false);
   };
 
   const capturePhoto = (): void => {
     const canvas = canvasRef.current;
     const video = videoRef.current;
-    
     if (!canvas || !video) return;
-    
     const context = canvas.getContext('2d');
     if (!context) return;
-    
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     context.drawImage(video, 0, 0);
-    
     const imageData = canvas.toDataURL('image/jpeg');
     setUploadedImage(imageData);
-    
-    // Detener cámara
-    const stream = video.srcObject as MediaStream;
-    if (stream) {
-      const tracks = stream.getTracks();
-      tracks.forEach(track => track.stop());
-    }
-    setCameraActive(false);
+    stopCamera();
     setAnalysisComplete(false);
   };
 
@@ -384,26 +397,41 @@ const AIAnalysis: React.FC = () => {
             {cameraActive && (
               <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
                 <div className="bg-white p-6 rounded-xl max-w-md w-full mx-4">
-                  <video
-                    ref={videoRef}
-                    autoPlay
-                    playsInline
-                    className="w-full rounded-lg mb-4"
-                  />
-                  <div className="flex gap-4">
-                    <button
-                      onClick={capturePhoto}
-                      className="flex-1 bg-teal-600 text-white py-3 px-6 rounded-lg hover:bg-teal-700 transition-colors font-semibold"
-                    >
-                      Capturar
-                    </button>
-                    <button
-                      onClick={() => setCameraActive(false)}
-                      className="flex-1 bg-gray-500 text-white py-3 px-6 rounded-lg hover:bg-gray-600 transition-colors font-semibold"
-                    >
-                      Cancelar
-                    </button>
-                  </div>
+                  {cameraError ? (
+                    <div className="flex flex-col items-center justify-center py-8">
+                      <span className="text-red-600 mb-2">{cameraError}</span>
+                      <button
+                        onClick={stopCamera}
+                        className="bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600 transition-colors"
+                      >
+                        Cerrar
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <video
+                        ref={videoRef}
+                        autoPlay
+                        playsInline
+                        className="w-full rounded-lg mb-4"
+                        style={{ background: "#222", minHeight: 240 }}
+                      />
+                      <div className="flex gap-4">
+                        <button
+                          onClick={capturePhoto}
+                          className="flex-1 bg-teal-600 text-white py-3 px-6 rounded-lg hover:bg-teal-700 transition-colors font-semibold"
+                        >
+                          Capturar
+                        </button>
+                        <button
+                          onClick={stopCamera}
+                          className="flex-1 bg-gray-500 text-white py-3 px-6 rounded-lg hover:bg-gray-600 transition-colors font-semibold"
+                        >
+                          Cancelar
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             )}

@@ -286,7 +286,7 @@ export default function Auth({ onLoginSuccess, onRegisterSuccess, className = ''
               value={formData.email}
               onChange={(e) => handleInputChange('email', e.target.value)}
               onBlur={() => handleBlur('email')}
-              className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors ${
+              className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors text-gray-700 ${
                 validationResults.email ? 'border-red-300' : 'border-gray-300'
               }`}
               disabled={isLoading}
@@ -318,7 +318,7 @@ export default function Auth({ onLoginSuccess, onRegisterSuccess, className = ''
               value={formData.password}
               onChange={(e) => handleInputChange('password', e.target.value)}
               onBlur={() => handleBlur('password')}
-              className={`block w-full pl-10 pr-10 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors ${
+              className={`block w-full pl-10 pr-10 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent text-gray-700 transition-colors ${
                 validationResults.password ? 'border-red-300' : 'border-gray-300'
               }`}
               disabled={isLoading}
@@ -382,7 +382,7 @@ export default function Auth({ onLoginSuccess, onRegisterSuccess, className = ''
                 value={formData.confirmPassword}
                 onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
                 onBlur={() => handleBlur('confirmPassword')}
-                className={`block w-full pl-10 pr-10 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors ${
+                className={`block w-full pl-10 pr-10 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent text-gray-700 transition-colors ${
                   validationResults.confirmPassword ? 'border-red-300' : 'border-gray-300'
                 }`}
                 disabled={isLoading}

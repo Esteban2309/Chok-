@@ -158,7 +158,7 @@ export default function Home() {
             {/* Hero Section */}
             <section className="text-center py-20">
               <div className="max-w-4xl mx-auto">
-                <h1 className="text-5xl md:text-7xl font-bold mb-6 animate-gradient bg-clip-text text-transparent">
+                <h1 className="text-5xl md:text-7xl font-bold mb-6 animate-gradient bg-clip-text ">
                   Chok-Chok
                 </h1>
                 <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-4">
@@ -306,13 +306,8 @@ export default function Home() {
           </div>
         )}
 
+        {/* Virtual Assistant Section - usando 'ai' para coincidir con Navigation */}
         {currentSection === 'ai' && (
-          <div className="max-w-4xl mx-auto">
-            <AIAnalysis />
-          </div>
-        )}
-
-        {currentSection === 'assistant' && (
           <div className="max-w-4xl mx-auto">
             <VirtualAssistant />
           </div>
