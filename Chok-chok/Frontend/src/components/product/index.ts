@@ -1,0 +1,3 @@
+// Barrel file para componentes de producto
+export { default as ProductList } from './ProductList';
+export { default as ProductDetail } from './ProductDetail';

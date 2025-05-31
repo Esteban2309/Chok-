@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { AnalysisResults } from '../../types/analysis';
 
 // --- Interfaces Mejoradas ---
 interface RoutineStep {

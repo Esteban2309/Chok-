@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useMemo, useEffect } from 'react';
+import { AnalysisResults } from '../../types/analysis';
 
 // Interfaces y tipos
 interface DiagnosisFormProps {

@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useMemo, memo } from 'react';
 // import Image from 'next/image'; // Comentado temporalmente
+import { AnalysisResults } from '../../types/analysis';
 
 // Tipos de datos mejorados
 interface Product {

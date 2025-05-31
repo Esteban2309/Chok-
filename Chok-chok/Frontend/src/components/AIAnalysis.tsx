@@ -1,6 +1,9 @@
 'use client';
 
 import React, { useState, useRef, useCallback } from 'react';
+import { useAnalysis } from '../hooks/useAnalysis';
+import { isValidImage } from '../utils/imageUtils';
+
 // Iconos SVG personalizados
 const Upload = ({ className }: { className?: string }) => (
   <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -131,9 +134,6 @@ type Priority = 'Crítica' | 'Alta' | 'Media';
 
 const AIAnalysis: React.FC = () => {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
-  const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
-  const [analysisComplete, setAnalysisComplete] = useState<boolean>(false);
-  const [analysisResults, setAnalysisResults] = useState<AnalysisResults | null>(null);
   const [activeTab, setActiveTab] = useState<ActiveTab>('overview');
   const [cameraActive, setCameraActive] = useState<boolean>(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
@@ -142,103 +142,18 @@ const AIAnalysis: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const cameraStreamRef = useRef<MediaStream | null>(null);
 
-  // Simular análisis de IA con resultados realistas
-  const performAnalysis = useCallback(async (): Promise<void> => {
-    setIsAnalyzing(true);
-    
-    // Simular tiempo de procesamiento
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    
-    // Generar resultados de análisis simulados pero realistas
-    const mockResults: AnalysisResults = {
-      overallScore: Math.floor(Math.random() * 20) + 75, // 75-95
-      skinType: ['Mixta', 'Grasa', 'Seca', 'Normal'][Math.floor(Math.random() * 4)],
-      concerns: {
-        acne: {
-          severity: Math.floor(Math.random() * 4) + 1, // 1-5
-          areas: ['Zona T', 'Mejillas', 'Mentón'],
-          count: Math.floor(Math.random() * 15) + 3
-        },
-        wrinkles: {
-          severity: Math.floor(Math.random() * 3) + 1,
-          areas: ['Contorno de ojos', 'Frente', 'Sonrisa'],
-          depth: 'Leve a moderado'
-        },
-        pigmentation: {
-          severity: Math.floor(Math.random() * 3) + 1,
-          type: 'Melasma leve',
-          coverage: '12%'
-        },
-        pores: {
-          size: 'Medianos',
-          visibility: 'Moderada',
-          distribution: 'Zona T principalmente'
-        },
-        hydration: {
-          level: Math.floor(Math.random() * 30) + 60, // 60-90%
-          zones: {
-            tZone: 'Normal',
-            cheeks: 'Ligeramente seca',
-            eye: 'Bien hidratada'
-          }
-        },
-        oiliness: {
-          level: Math.floor(Math.random() * 40) + 30, // 30-70%
-          distribution: 'Concentrada en zona T'
-        }
-      },
-      recommendations: [
-        {
-          category: 'Limpieza',
-          product: 'Gel limpiador con ácido salicílico',
-          frequency: '2 veces al día',
-          priority: 'Alta'
-        },
-        {
-          category: 'Hidratación',
-          product: 'Crema hidratante con ácido hialurónico',
-          frequency: 'Mañana y noche',
-          priority: 'Alta'
-        },
-        {
-          category: 'Protección',
-          product: 'Protector solar SPF 50+',
-          frequency: 'Diariamente',
-          priority: 'Crítica'
-        },
-        {
-          category: 'Tratamiento',
-          product: 'Sérum con niacinamida 10%',
-          frequency: '1 vez al día (noche)',
-          priority: 'Media'
-        }
-      ],
-      routine: {
-        morning: [
-          'Limpiador suave',
-          'Tónico equilibrante',
-          'Sérum vitamina C',
-          'Crema hidratante',
-          'Protector solar SPF 50+'
-        ],
-        evening: [
-          'Desmaquillante',
-          'Limpiador con ácido salicílico',
-          'Sérum niacinamida',
-          'Crema reparadora nocturna',
-          'Tratamiento localizado'
-        ]
-      }
-    };
-    
-    setAnalysisResults(mockResults);
-    setIsAnalyzing(false);
-    setAnalysisComplete(true);
-  }, []);
+  const {
+    isAnalyzing,
+    analysisResults,
+    analysisComplete,
+    performAnalysis,
+    setAnalysisResults,
+    setAnalysisComplete
+  } = useAnalysis();
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>): void => {
     const file = event.target.files?.[0];
-    if (file) {
+    if (file && isValidImage(file)) {
       const reader = new FileReader();
       reader.onload = (e: ProgressEvent<FileReader>) => {
         if (e.target?.result) {
@@ -477,7 +392,7 @@ const AIAnalysis: React.FC = () => {
                     </button>
                     {!analysisComplete && !isAnalyzing && (
                       <button
-                        onClick={performAnalysis}
+                        onClick={() => performAnalysis(uploadedImage!)}
                         className="flex-1 bg-gradient-to-r from-slate-600 to-teal-600 text-white py-2 px-4 rounded-lg hover:from-slate-700 hover:to-teal-700 transition-all text-sm font-semibold flex items-center justify-center gap-2"
                       >
                         <Zap className="w-4 h-4" />
@@ -633,31 +548,21 @@ const AIAnalysis: React.FC = () => {
 
                         {activeTab === 'concerns' && (
                           <div className="space-y-6">
-                            {Object.entries(analysisResults.concerns).map(([key, concern]) => (
+                            {Object.entries(analysisResults.concerns as Record<string, any>).map(([key, concern]) => (
                               <div key={key} className="bg-slate-50 p-4 rounded-lg border border-slate-200">
                                 <div className="flex items-center justify-between mb-3">
-                                  <h4 className="font-semibold text-slate-800 capitalize">
-                                    {key === 'acne' ? 'Acné y Imperfecciones' :
-                                     key === 'wrinkles' ? 'Líneas y Arrugas' :
-                                     key === 'pigmentation' ? 'Pigmentación' :
-                                     key === 'pores' ? 'Poros' :
-                                     key === 'hydration' ? 'Hidratación' :
-                                     key === 'oiliness' ? 'Producción de Grasa' : key}
-                                  </h4>
+                                  <span className="font-semibold text-slate-800 capitalize">{key}</span>
                                   {concern.severity && (
                                     <span className={`px-3 py-1 rounded-full text-sm font-medium ${getSeverityColor(concern.severity)}`}>
                                       Nivel {concern.severity}/5
                                     </span>
                                   )}
                                 </div>
-                                <div className="grid md:grid-cols-2 gap-4 text-sm text-slate-600">
+                                <div className="text-slate-700 text-sm">
                                   {Object.entries(concern).map(([detailKey, detailValue]) => (
                                     detailKey !== 'severity' && (
-                                      <div key={detailKey}>
-                                        <span className="font-medium capitalize">{detailKey}: </span>
-                                        {Array.isArray(detailValue) ? detailValue.join(', ') : 
-                                         typeof detailValue === 'object' ? JSON.stringify(detailValue) : 
-                                         detailValue}
+                                      <div key={detailKey} className="mb-1">
+                                        <span className="font-medium capitalize">{detailKey}:</span> {Array.isArray(detailValue) ? (detailValue as string[]).join(', ') : String(detailValue)}
                                       </div>
                                     )
                                   ))}

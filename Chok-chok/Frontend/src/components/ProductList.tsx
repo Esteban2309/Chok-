@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import { AnalysisResults } from '../../types/analysis';
 
 // Definir tipo para Producto con más propiedades
 interface Product {
